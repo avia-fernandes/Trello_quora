@@ -59,4 +59,40 @@ public class QuestionBusinessService {
 
         return questionUuid;
    }
+
+    public QuestionEntity getQuestion(final String questionUuid, final String accessToken) throws InvalidQuestionException{
+
+        QuestionEntity questionEntity = questionDao.getQuestionByUuid(questionUuid);
+        if(questionEntity == null) {
+            throw new InvalidQuestionException("QUES-001", "Entered question uuid does not exist");
+        }
+         return questionEntity;
+
+    }
+
+    public QuestionEntity editQuestion(final QuestionEntity questionEntity, final String accessToken)throws AuthorizationFailedException{
+        UserAuthTokenEntity userAuthToken = userDao.getUserAuthToken(accessToken);
+        if (userAuthToken == null) {
+            throw new AuthorizationFailedException("ATHR-001", "User has not signed in");
+        }
+        ZonedDateTime logoutTime = userAuthToken.getLogoutAt();
+        if(logoutTime!= null) {
+            throw new AuthorizationFailedException("ATHR-002", "User is signed out.Sign in first to edit a question");
+        }
+
+        String questionOwnnerUuid = questionEntity.getUser().getUuid();
+        String signedInUserUuid = userAuthToken.getUser().getUuid();
+
+        if(questionOwnnerUuid.equals(signedInUserUuid)){
+            QuestionEntity updatedQuestion = questionDao.updateQuestion(questionEntity);
+            return updatedQuestion;
+        }
+
+        else{
+            throw new AuthorizationFailedException("ATHR-003","Only the question owner or admin can edit the question");
+        }
+
+
+    }
+
 }

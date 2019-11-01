@@ -51,7 +51,7 @@ public class UserBusinessService {
         }
 
     /** comments by Avia **/
-        //The below method checks if the user was assigned a token (i.e. if the user is signed in) and if the assigned token is expired.
+        //The below method checks if the user was assigned a token (i.e. if the user is signed in) and if the user is still logged in.
         //If the token is valid, the method returns the corresponding user entity.
 
     public UserEntity getUser(final String userUuid,final String authorizationToken) throws AuthorizationFailedException, UserNotFoundException {
@@ -67,14 +67,14 @@ public class UserBusinessService {
             if (logout==null){
                 UserEntity userEntity =  userDao.getUserByUuid(userUuid);
                 if (userEntity == null) {
-                    throw new UserNotFoundException("USR-001", "User with entered uuid to be deleted does not exist");
+                    throw new UserNotFoundException("USR-001", "User with entered uuid does not exist");
                 }
                 return userEntity;
             }
             else{
-                throw new UserNotFoundException("USR-001", "User with entered uuid to be deleted does not exist");
+                throw new AuthorizationFailedException("ATHR-002", "User is signed out.Sign in first to get user details");
             }
-            
+
         }
 
     }

@@ -62,6 +62,7 @@ public class QuestionControllerTest {
                 .andExpect(status().isForbidden())
                 .andExpect(MockMvcResultMatchers.jsonPath("code").value("ATHR-002"));
     }
+ **/
 
     //This test case passes when you try to edit the question but the JWT token entered does not exist in the database.
     @Test
@@ -95,7 +96,7 @@ public class QuestionControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("code").value("QUES-001"));
     }
 
-    **/
+
 
     //This test case passes when you try to delete the question but the JWT token entered does not exist in the database.
     @Test

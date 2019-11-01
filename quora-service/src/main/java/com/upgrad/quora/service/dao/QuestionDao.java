@@ -29,5 +29,12 @@ public class QuestionDao {
         entityManager.remove(questionEntity);
     }
 
+
+    /** comments by Avia **/
+    //This method updates the question in the database
+    public QuestionEntity updateQuestion(final QuestionEntity questionEntity) {
+        QuestionEntity updatedQ = entityManager.merge(questionEntity);
+            return updatedQ;
+    }
 }
 
