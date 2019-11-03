@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 
 @Service
 public class QuestionBusinessService {
@@ -22,6 +23,9 @@ public class QuestionBusinessService {
 
     @Autowired
     QuestionDao questionDao;
+
+    @Autowired
+    UserBusinessService userBusinessService;
 
 @Transactional(propagation = Propagation.REQUIRED)
    public String deleteQuestion(final String questionUuid, final String accessToken) throws AuthorizationFailedException, InvalidQuestionException {
@@ -60,6 +64,10 @@ public class QuestionBusinessService {
         return questionUuid;
    }
 
+    /** comments by Avia **/
+    //This method updates the question in the database
+
+
     public QuestionEntity getQuestion(final String questionUuid, final String accessToken) throws InvalidQuestionException{
 
         QuestionEntity questionEntity = questionDao.getQuestionByUuid(questionUuid);
@@ -70,28 +78,39 @@ public class QuestionBusinessService {
 
     }
 
-    public QuestionEntity editQuestion(final QuestionEntity questionEntity, final String accessToken)throws AuthorizationFailedException{
+    public QuestionEntity editQuestion(final QuestionEntity questionEntity, final String accessToken) throws Exception {
         UserAuthTokenEntity userAuthToken = userDao.getUserAuthToken(accessToken);
-        if (userAuthToken == null) {
-            throw new AuthorizationFailedException("ATHR-001", "User has not signed in");
-        }
-        ZonedDateTime logoutTime = userAuthToken.getLogoutAt();
-        if(logoutTime!= null) {
-            throw new AuthorizationFailedException("ATHR-002", "User is signed out.Sign in first to edit a question");
-        }
+        Exception e = userBusinessService.validateToken(accessToken);
+        if(e==null) {
 
-        String questionOwnnerUuid = questionEntity.getUser().getUuid();
-        String signedInUserUuid = userAuthToken.getUser().getUuid();
+            String questionOwnerUuid = questionEntity.getUser().getUuid();
+            String signedInUserUuid = userAuthToken.getUser().getUuid();
 
-        if(questionOwnnerUuid.equals(signedInUserUuid)){
-            QuestionEntity updatedQuestion = questionDao.updateQuestion(questionEntity);
-            return updatedQuestion;
+            if (questionOwnerUuid.equals(signedInUserUuid)) {
+                QuestionEntity updatedQuestion = questionDao.updateQuestion(questionEntity);
+                return updatedQuestion;
+            }
+
+            else{
+                throw new AuthorizationFailedException("ATHR-003","Only the question owner or admin can edit the question");
+            }
         }
 
         else{
-            throw new AuthorizationFailedException("ATHR-003","Only the question owner or admin can edit the question");
+            throw e;
         }
 
+    }
+
+    public List<QuestionEntity> getAllQuestions(final String accessToken, String userUuid) throws Exception {
+        Exception e = userBusinessService.validateToken(accessToken);
+        if(e==null){
+            return questionDao.getAllQuestionsByUser(userUuid);
+        }
+
+        else{
+            throw e;
+        }
 
     }
 

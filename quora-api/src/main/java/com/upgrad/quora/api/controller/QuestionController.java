@@ -1,6 +1,7 @@
 package com.upgrad.quora.api.controller;
 
 import com.upgrad.quora.api.model.QuestionDeleteResponse;
+import com.upgrad.quora.api.model.QuestionDetailsResponse;
 import com.upgrad.quora.api.model.QuestionEditRequest;
 import com.upgrad.quora.api.model.QuestionEditResponse;
 import com.upgrad.quora.service.business.QuestionBusinessService;
@@ -13,6 +14,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
 
 
 @RestController
@@ -40,7 +44,8 @@ public class QuestionController {
         //This method returns an object of QuestionDeleteResponse and HttpStatus
         return new ResponseEntity<QuestionDeleteResponse>(authorizedDeletedResponse, HttpStatus.OK);
     }
-
+    /**Commets by Avia **/
+    //
     @RequestMapping(method = RequestMethod.PUT, path = "/question/edit/{questionId}", consumes= MediaType.APPLICATION_JSON_UTF8_VALUE, produces=MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<QuestionEditResponse> editQuestionContent(@PathVariable("questionId") final String questionUuid, @RequestHeader("authorization") final String authorization, final QuestionEditRequest editRequest) throws AuthorizationFailedException, InvalidQuestionException{
         QuestionEntity questionEntity;
@@ -67,4 +72,31 @@ public class QuestionController {
         return new ResponseEntity<QuestionEditResponse>(questionEditResponse, HttpStatus.OK);
 
     }
+
+    @RequestMapping(method = RequestMethod.GET, path = "question/all/{userId}", produces=MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<List<QuestionDetailsResponse>> getAllQuestionsByUser(@RequestHeader("authorization") final String authorization, @PathVariable ("userId") final String userUuid) throws Exception {
+        List<QuestionEntity> listOfUserQuestions = new ArrayList<>();
+        try{
+            String[] bearerAccessToken = authorization.split("Bearer ");
+            try {
+                listOfUserQuestions = questionBusinessService.getAllQuestions(bearerAccessToken[1],userUuid);
+            } catch (AuthorizationFailedException e) {
+                e.printStackTrace();
+            }
+        }
+        catch(ArrayIndexOutOfBoundsException are){
+            listOfUserQuestions = questionBusinessService.getAllQuestions(authorization,userUuid);
+        }
+
+        ListIterator<QuestionEntity> questions = listOfUserQuestions.listIterator();
+        List<QuestionDetailsResponse> displayQuestionIdAndContent = new ArrayList<>();
+        while(questions.hasNext()){
+            QuestionDetailsResponse questionDetailsResponse = new QuestionDetailsResponse().id(questions.next().getUuid()).content(questions.next().getContent());
+            displayQuestionIdAndContent.add(questionDetailsResponse);
+
+        }
+        return new ResponseEntity<List<QuestionDetailsResponse>>(displayQuestionIdAndContent,HttpStatus.CREATED);
+    }
+
+
 }

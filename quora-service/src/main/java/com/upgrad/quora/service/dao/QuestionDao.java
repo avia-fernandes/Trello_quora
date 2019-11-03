@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import java.util.List;
 
 @Repository
 public class QuestionDao {
@@ -36,5 +37,17 @@ public class QuestionDao {
         QuestionEntity updatedQ = entityManager.merge(questionEntity);
             return updatedQ;
     }
+
+    /** comments by Avia **/
+    //This method retrieves all the questions posted by a user
+    public List<QuestionEntity> getAllQuestionsByUser(final String userUuid){
+        try{
+            return entityManager.createNamedQuery("AllQuestionsByUser", QuestionEntity.class).setParameter("uuid",userUuid).getResultList();
+        }
+        catch (NoResultException nre){
+            return null;
+        }
+    }
+
 }
 

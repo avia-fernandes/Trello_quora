@@ -55,29 +55,33 @@ public class UserBusinessService {
         //If the token is valid, the method returns the corresponding user entity.
 
     public UserEntity getUser(final String userUuid,final String authorizationToken) throws AuthorizationFailedException, UserNotFoundException {
+        Exception e = validateToken(authorizationToken);
+        UserEntity userEntity;
+        if(e==null){
+            return userEntity =  userDao.getUserByUuid(userUuid);
+        }
+        else{
+            throw new UserNotFoundException("USR-001", "User with entered uuid does not exist");
+        }
+    }
 
+    /** comments by Avia **/
+    //The below methods checks for ATHR-001 and ATHR-002 exceptions, else returns null if no exception is found
+    public Exception validateToken (final String authorizationToken) throws AuthorizationFailedException {
         UserAuthTokenEntity userAuthTokenEntity = userDao.getUserAuthToken(authorizationToken);
         //If the userAuthTokenEntity returns null, it implies the token doesn't exist hence the user is not signed in and wasn't assigned a token
         if(userAuthTokenEntity == null){
-            throw new AuthorizationFailedException("ATHR-001","User has not signed in");
+            return new AuthorizationFailedException("ATHR-001","User has not signed in");
         }
-        //If the token is valid, we need to check if it's expired or not by comparing the current time with the previously set token expiry time.
-        else {
+        else{
             ZonedDateTime logout = userAuthTokenEntity.getLogoutAt();
-            if (logout==null){
-                UserEntity userEntity =  userDao.getUserByUuid(userUuid);
-                if (userEntity == null) {
-                    throw new UserNotFoundException("USR-001", "User with entered uuid does not exist");
-                }
-                return userEntity;
-            }
-            else{
+            if(logout != null){
                 throw new AuthorizationFailedException("ATHR-002", "User is signed out.Sign in first to get user details");
             }
-
         }
-
+        return null;
     }
+
 }
 
 
