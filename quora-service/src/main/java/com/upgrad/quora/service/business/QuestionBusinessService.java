@@ -7,6 +7,7 @@ import com.upgrad.quora.service.entity.QuestionEntity;
 import com.upgrad.quora.service.entity.UserAuthTokenEntity;
 import com.upgrad.quora.service.exception.AuthorizationFailedException;
 import com.upgrad.quora.service.exception.InvalidQuestionException;
+import com.upgrad.quora.service.exception.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -65,7 +66,7 @@ public class QuestionBusinessService {
    }
 
     /** comments by Avia **/
-    //This method updates the question in the database
+    //This method retrieves the question in the database
 
 
     public QuestionEntity getQuestion(final String questionUuid, final String accessToken) throws InvalidQuestionException{
@@ -77,6 +78,11 @@ public class QuestionBusinessService {
          return questionEntity;
 
     }
+    /** comments by Avia **/
+    //This method updates the question in the database
+    //THe method first checks if the user token is valid
+    //Next it checks if the user trying to edit is the owner of the question.
+    //If the current user is not the owner it throws an exception, else the question is updated
 
     public QuestionEntity editQuestion(final QuestionEntity questionEntity, final String accessToken) throws Exception {
         UserAuthTokenEntity userAuthToken = userDao.getUserAuthToken(accessToken);
@@ -102,11 +108,11 @@ public class QuestionBusinessService {
 
     }
 
-    public List<QuestionEntity> getAllQuestions(final String accessToken, String userUuid) throws Exception {
+    public List<QuestionEntity> getAllQuestionsByUser(final String accessToken, String userUuid) throws Exception {
         Exception e = userBusinessService.validateToken(accessToken);
         if(e==null){
-            return questionDao.getAllQuestionsByUser(userUuid);
-        }
+            return questionDao.getAllQuestionsByUser(userUuid);}
+
 
         else{
             throw e;

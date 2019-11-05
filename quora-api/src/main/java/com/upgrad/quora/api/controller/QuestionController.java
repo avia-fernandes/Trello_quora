@@ -8,6 +8,7 @@ import com.upgrad.quora.service.business.QuestionBusinessService;
 import com.upgrad.quora.service.entity.QuestionEntity;
 import com.upgrad.quora.service.exception.AuthorizationFailedException;
 import com.upgrad.quora.service.exception.InvalidQuestionException;
+import com.upgrad.quora.service.exception.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -47,7 +48,7 @@ public class QuestionController {
     /**Commets by Avia **/
     //
     @RequestMapping(method = RequestMethod.PUT, path = "/question/edit/{questionId}", consumes= MediaType.APPLICATION_JSON_UTF8_VALUE, produces=MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<QuestionEditResponse> editQuestionContent(@PathVariable("questionId") final String questionUuid, @RequestHeader("authorization") final String authorization, final QuestionEditRequest editRequest) throws AuthorizationFailedException, InvalidQuestionException{
+    public ResponseEntity<QuestionEditResponse> editQuestionContent(@PathVariable("questionId") final String questionUuid, @RequestHeader("authorization") final String authorization, final QuestionEditRequest editRequest) throws Exception {
         QuestionEntity questionEntity;
         QuestionEntity editedQuestion;
         try{
@@ -79,15 +80,17 @@ public class QuestionController {
         try{
             String[] bearerAccessToken = authorization.split("Bearer ");
             try {
-                listOfUserQuestions = questionBusinessService.getAllQuestions(bearerAccessToken[1],userUuid);
+                listOfUserQuestions = questionBusinessService.getAllQuestionsByUser(bearerAccessToken[1],userUuid);
             } catch (AuthorizationFailedException e) {
                 e.printStackTrace();
             }
         }
-        catch(ArrayIndexOutOfBoundsException are){
-            listOfUserQuestions = questionBusinessService.getAllQuestions(authorization,userUuid);
+        catch(Exception e){
+            listOfUserQuestions = questionBusinessService.getAllQuestionsByUser
+                    (authorization,userUuid);
         }
 
+        try{
         ListIterator<QuestionEntity> questions = listOfUserQuestions.listIterator();
         List<QuestionDetailsResponse> displayQuestionIdAndContent = new ArrayList<>();
         while(questions.hasNext()){
@@ -95,7 +98,11 @@ public class QuestionController {
             displayQuestionIdAndContent.add(questionDetailsResponse);
 
         }
-        return new ResponseEntity<List<QuestionDetailsResponse>>(displayQuestionIdAndContent,HttpStatus.CREATED);
+        return new ResponseEntity<List<QuestionDetailsResponse>>(displayQuestionIdAndContent,HttpStatus.CREATED);}
+
+        catch (NullPointerException npe){
+            throw new UserNotFoundException("USR-001","User with entered uuid does not exist");
+        }
     }
 
 
