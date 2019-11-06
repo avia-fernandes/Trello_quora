@@ -42,7 +42,7 @@ public class QuestionDao {
     //This method retrieves all the questions posted by a user
     public List<QuestionEntity> getAllQuestionsByUser(final String userUuid){
         try{
-            return entityManager.createNamedQuery("AllQuestionsByUser", QuestionEntity.class).setParameter("uuid",userUuid).getResultList();
+            return entityManager.createNamedQuery("AllQuestionsByUser", QuestionEntity.class).setParameter("user",userUuid).getResultList();
         }
         catch (NoResultException nre){
             return null;

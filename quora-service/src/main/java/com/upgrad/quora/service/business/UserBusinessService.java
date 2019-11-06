@@ -63,7 +63,7 @@ public class UserBusinessService {
 
         }
         else{
-            throw e;
+            return null;
         }
     }
 

@@ -5,6 +5,7 @@ import com.upgrad.quora.service.dao.QuestionDao;
 import com.upgrad.quora.service.dao.UserDao;
 import com.upgrad.quora.service.entity.QuestionEntity;
 import com.upgrad.quora.service.entity.UserAuthTokenEntity;
+import com.upgrad.quora.service.entity.UserEntity;
 import com.upgrad.quora.service.exception.AuthorizationFailedException;
 import com.upgrad.quora.service.exception.InvalidQuestionException;
 import com.upgrad.quora.service.exception.UserNotFoundException;
@@ -108,9 +109,15 @@ public class QuestionBusinessService {
 
     }
 
-    public List<QuestionEntity> getAllQuestionsByUser(final String accessToken, String userUuid) throws Exception {
+    public List<QuestionEntity> getAllQuestionsByUser(final String accessToken, String userUuid) throws Exception, NullPointerException {
+
+
         Exception e = userBusinessService.validateToken(accessToken);
         if(e==null){
+            UserEntity userEntity = userBusinessService.getUser(userUuid,accessToken);
+            if (userEntity == null) {
+                throw new UserNotFoundException("USR-001", "User with entered uuid whose question details are to be seen does not exist");
+            }
             return questionDao.getAllQuestionsByUser(userUuid);}
 
 

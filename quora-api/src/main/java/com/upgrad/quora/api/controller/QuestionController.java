@@ -5,7 +5,9 @@ import com.upgrad.quora.api.model.QuestionDetailsResponse;
 import com.upgrad.quora.api.model.QuestionEditRequest;
 import com.upgrad.quora.api.model.QuestionEditResponse;
 import com.upgrad.quora.service.business.QuestionBusinessService;
+import com.upgrad.quora.service.business.UserBusinessService;
 import com.upgrad.quora.service.entity.QuestionEntity;
+import com.upgrad.quora.service.entity.UserEntity;
 import com.upgrad.quora.service.exception.AuthorizationFailedException;
 import com.upgrad.quora.service.exception.InvalidQuestionException;
 import com.upgrad.quora.service.exception.UserNotFoundException;
@@ -24,12 +26,14 @@ import java.util.ListIterator;
 @RequestMapping("/")
 public class QuestionController {
 
-    @Autowired
-    QuestionBusinessService questionBusinessService;
     /**Commets by Archana **/
     //The admin or the owner of the Question has a privilege of deleting the question
     //This endpoint requests for the questionUuid to be deleted and the questionowner or admin accesstoken in the authorization header
+    @Autowired
+    QuestionBusinessService questionBusinessService;
 
+    @Autowired
+    UserBusinessService userBusinessService;
 
     @RequestMapping(method = RequestMethod.DELETE, path = "/question/delete/{questionId}",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<QuestionDeleteResponse> deleteQuestion(@PathVariable("questionId") final String questionUuid, @RequestHeader("authorization") final String authorization)throws AuthorizationFailedException, InvalidQuestionException {
@@ -78,16 +82,12 @@ public class QuestionController {
     public ResponseEntity<List<QuestionDetailsResponse>> getAllQuestionsByUser(@RequestHeader("authorization") final String authorization, @PathVariable ("userId") final String userUuid) throws Exception {
         List<QuestionEntity> listOfUserQuestions = new ArrayList<>();
         try{
+
             String[] bearerAccessToken = authorization.split("Bearer ");
-            try {
                 listOfUserQuestions = questionBusinessService.getAllQuestionsByUser(bearerAccessToken[1],userUuid);
-            } catch (AuthorizationFailedException e) {
-                e.printStackTrace();
-            }
         }
         catch(Exception e){
-            listOfUserQuestions = questionBusinessService.getAllQuestionsByUser
-                    (authorization,userUuid);
+            listOfUserQuestions = questionBusinessService.getAllQuestionsByUser(authorization,userUuid);
         }
 
         try{
@@ -95,13 +95,13 @@ public class QuestionController {
         List<QuestionDetailsResponse> displayQuestionIdAndContent = new ArrayList<>();
         while(questions.hasNext()){
             QuestionDetailsResponse questionDetailsResponse = new QuestionDetailsResponse().id(questions.next().getUuid()).content(questions.next().getContent());
-            displayQuestionIdAndContent.add(questionDetailsResponse);
-
+            displayQuestionIdAndContent.add(questionDetailsResponse);}
+            return new ResponseEntity<List<QuestionDetailsResponse>>(displayQuestionIdAndContent,HttpStatus.CREATED);
         }
-        return new ResponseEntity<List<QuestionDetailsResponse>>(displayQuestionIdAndContent,HttpStatus.CREATED);}
+
 
         catch (NullPointerException npe){
-            throw new UserNotFoundException("USR-001","User with entered uuid does not exist");
+           throw new UserNotFoundException("USR-001","User with entered uuid does not exist");
         }
     }
 
