@@ -32,6 +32,7 @@ public class QuestionController {
     /**Comments by Avia **/
     //This method only allows the owner of the question to edit a question
     //To edit a question, this endpoint takes in the questionUuid, access token and the content to be updated from the editRequest.
+    //The Uuid of the edited question is added to the edit response
 
     @RequestMapping(method = RequestMethod.PUT, path = "/question/edit/{questionId}", consumes= MediaType.APPLICATION_JSON_UTF8_VALUE, produces=MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<QuestionEditResponse> editQuestionContent(@PathVariable("questionId") final String questionUuid, @RequestHeader("authorization") final String authorization, final QuestionEditRequest editRequest) throws Exception {
