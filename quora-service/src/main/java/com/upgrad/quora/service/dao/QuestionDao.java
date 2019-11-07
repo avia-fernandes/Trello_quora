@@ -13,24 +13,6 @@ public class QuestionDao {
     @PersistenceContext
     private EntityManager entityManager;
 
-
-    /** comments by Archana **/
-    //This method retrieves the question based on question uuid, if found returns question else null
-    public QuestionEntity getQuestionByUuid(final String uuid) {
-        try {
-            return entityManager.createNamedQuery("QuestionByUuid", QuestionEntity.class).setParameter("uuid", uuid).getSingleResult();
-        } catch (NoResultException nre) {
-            return null;
-        }
-    }
-
-    /** comments by Archana **/
-    //This method deletes the question record from database
-    public void deleteQuestion(final QuestionEntity questionEntity) {
-        entityManager.remove(questionEntity);
-    }
-
-
     /** comments by Avia **/
     //This method updates the question in the database
     public QuestionEntity updateQuestion(final QuestionEntity questionEntity) {
@@ -39,7 +21,7 @@ public class QuestionDao {
     }
 
     /** comments by Avia **/
-    //This method retrieves all the questions posted by a user
+    //This method retrieves all the questions posted by a user and returns null if the list is empty.
     public List<QuestionEntity> getAllQuestionsByUser(final String userUuid){
         try{
             return entityManager.createNamedQuery("AllQuestionsByUser", QuestionEntity.class).setParameter("user",userUuid).getResultList();

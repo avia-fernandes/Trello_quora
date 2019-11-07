@@ -26,31 +26,13 @@ import java.util.ListIterator;
 @RequestMapping("/")
 public class QuestionController {
 
-    /**Commets by Archana **/
-    //The admin or the owner of the Question has a privilege of deleting the question
-    //This endpoint requests for the questionUuid to be deleted and the questionowner or admin accesstoken in the authorization header
     @Autowired
     QuestionBusinessService questionBusinessService;
 
-    @Autowired
-    UserBusinessService userBusinessService;
+    /**Comments by Avia **/
+    //This method only allows the owner of the question to edit a question
+    //To edit a question, this endpoint takes in the questionUuid, access token and the content to be updated from the editRequest.
 
-    @RequestMapping(method = RequestMethod.DELETE, path = "/question/delete/{questionId}",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<QuestionDeleteResponse> deleteQuestion(@PathVariable("questionId") final String questionUuid, @RequestHeader("authorization") final String authorization)throws AuthorizationFailedException, InvalidQuestionException {
-
-        String uuid ;
-        try {
-            String[] accessToken = authorization.split("Bearer ");
-            uuid = questionBusinessService.deleteQuestion(questionUuid, accessToken[1]);
-        }catch(ArrayIndexOutOfBoundsException are) {
-            uuid = questionBusinessService.deleteQuestion(questionUuid, authorization);
-        }
-        QuestionDeleteResponse authorizedDeletedResponse = new QuestionDeleteResponse().id(uuid).status("QUESTION DELETED");
-        //This method returns an object of QuestionDeleteResponse and HttpStatus
-        return new ResponseEntity<QuestionDeleteResponse>(authorizedDeletedResponse, HttpStatus.OK);
-    }
-    /**Commets by Avia **/
-    //
     @RequestMapping(method = RequestMethod.PUT, path = "/question/edit/{questionId}", consumes= MediaType.APPLICATION_JSON_UTF8_VALUE, produces=MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<QuestionEditResponse> editQuestionContent(@PathVariable("questionId") final String questionUuid, @RequestHeader("authorization") final String authorization, final QuestionEditRequest editRequest) throws Exception {
         QuestionEntity questionEntity;
@@ -65,7 +47,7 @@ public class QuestionController {
             questionEntity.setContent(editRequest.getContent());
             editedQuestion = questionBusinessService.editQuestion(questionEntity,authorization);
         }
-        /**Commets by Avia **/
+        /**Comments by Avia **/
         //In normal cases, updating an entity doesn't change the Uuid, meaning questionUuid==updatedUuid.
         // However, we have implemented this feature in case the system later requires to keep track of the updates, for e.g. by adding a suffix after every update like Uuid-1,-2, etc.
 
@@ -77,6 +59,9 @@ public class QuestionController {
         return new ResponseEntity<QuestionEditResponse>(questionEditResponse, HttpStatus.OK);
 
     }
+
+    /**Comments by Avia **/
+    //This method returns all the questions posted by user as a list and can be accessed by an user.
 
     @RequestMapping(method = RequestMethod.GET, path = "question/all/{userId}", produces=MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<List<QuestionDetailsResponse>> getAllQuestionsByUser(@RequestHeader("authorization") final String authorization, @PathVariable ("userId") final String userUuid) throws Exception {
@@ -90,19 +75,14 @@ public class QuestionController {
             listOfUserQuestions = questionBusinessService.getAllQuestionsByUser(authorization,userUuid);
         }
 
-        try{
+
         ListIterator<QuestionEntity> questions = listOfUserQuestions.listIterator();
         List<QuestionDetailsResponse> displayQuestionIdAndContent = new ArrayList<>();
         while(questions.hasNext()){
             QuestionDetailsResponse questionDetailsResponse = new QuestionDetailsResponse().id(questions.next().getUuid()).content(questions.next().getContent());
             displayQuestionIdAndContent.add(questionDetailsResponse);}
             return new ResponseEntity<List<QuestionDetailsResponse>>(displayQuestionIdAndContent,HttpStatus.CREATED);
-        }
 
-
-        catch (NullPointerException npe){
-           throw new UserNotFoundException("USR-001","User with entered uuid does not exist");
-        }
     }
 
 

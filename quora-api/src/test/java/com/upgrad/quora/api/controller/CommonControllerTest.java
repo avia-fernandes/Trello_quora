@@ -39,6 +39,8 @@ public class CommonControllerTest {
     //This test case passes when you try to get the details of the user which does not exist in the database.
     @Test
     public void detailsOfNonExistingUser() throws Exception {
+
+
         mvc.perform(MockMvcRequestBuilders.get("/userprofile/non_existing_user").header("authorization", "database_accesstoken"))
                 .andExpect(status().isNotFound())
                 .andExpect(MockMvcResultMatchers.jsonPath("code").value("USR-001"));

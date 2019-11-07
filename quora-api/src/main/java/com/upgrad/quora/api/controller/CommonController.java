@@ -32,16 +32,13 @@ public class CommonController {
         catch(Exception e){
             userEntity = userBusinessService.getUser(userUuid, authorization);
         }
-        try{
         UserDetailsResponse userDetailsResponse = new UserDetailsResponse().firstName(userEntity.getFirstName())
                 .lastName(userEntity.getLastName()).emailAddress(userEntity.getEmail())
                 .contactNumber(userEntity.getContactNumber()).userName(userEntity.getUserName())
                 .country(userEntity.getCountry()).aboutMe(userEntity.getAboutMe()).dob(userEntity.getDob());
-        return new ResponseEntity<UserDetailsResponse>(userDetailsResponse, HttpStatus.OK);}
+        return new ResponseEntity<UserDetailsResponse>(userDetailsResponse, HttpStatus.OK);
 
-        catch(NullPointerException npe){
-            throw new UserNotFoundException("USR-001","User with entered uuid does not exist");
-        }
+
 
     }
 }
